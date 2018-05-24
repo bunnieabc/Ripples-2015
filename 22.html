@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Clicks</title>
+		    <style>
+    	body {
+          font-family: "helvetica";
+          height: 300%;
+		  background:#000;
+	}
+      
+	svg {
+	  cursor: pointer;
+	  width: 200%;
+	  height:1000px;
+	}
+
+	circle {
+	 fill:white;
+	  stroke: #fff;
+	  opacity:0.3;
+	}
+	text{
+		fill:#fff;
+		font-size:10px;
+		display:none;
+		width:80px;
+		float:left;
+	}
+	t1
+	{
+		position:absolute;
+		display
+	}
+	h1{
+	color:#fff;
+	}
+	
+	.tooltip
+	{
+		background:#fff;
+		color:#000;
+		width:100px;
+		height:100px;
+
+		position:absolute;
+	}
+    </style>    
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		</head>
+
+		<body>
+		<h1>News Test</h1>
+		
+		<script type="text/javascript">
+		
+		/*
+		var data2 = [
+		  {x:10,y:10},
+		  {x:50,y:100},
+		  {x:60,y:50},
+		  {x:100,y:30}
+		];
+		*/
+		 var width = 2000,
+    		height = 900;
+		var dis_x=100;
+		var dis_y=200;
+		 var svg = d3.select("body").append("svg")
+			.attr("width", width)
+			.attr("height", height)
+	
+		
+d3.json("2.json", function(json) {
+    /* Define the data for the circles */
+	var tmp = new Array(3);
+	//依照Branch分群
+	for(var i=0;i<3;i++)
+	{
+		tmp[i] = {'nodes':[]};
+	}
+	
+	for(var i=0;i<3;i++)
+	{
+		var t=0;
+		for(var x=0;x<25;x++)
+		{
+			
+			if(json.nodes[x].Branch==i)
+			{
+				tmp[i].nodes.push(json.nodes[x]);
+				//alert(i+">"+tmp[i].nodes[t].Name);
+				t++;
+			}
+		}
+	}
+	//讀取資料
+    var elem = svg.selectAll("g")
+        .data(json.nodes)
+    var colors=["#F72C25", "#F7B32B", "#C1DD6C", "#9ED7E5","#988B8E"];
+	
+	//畫線
+	for(var h=0;h<3;h++)
+	{
+		var line = d3.svg.line()
+		.x(function(d) {
+		  //if(d.Branch==0)
+		  return (100+d.Number1*dis_x);
+		})
+		.y(function(d) {
+		  if(d.Branch==0)
+			return ((1-0.18)*3*dis_y+100);
+		  else if(d.Branch==1)
+		   return ((1-d.Relate)*3*dis_y-100);
+		  else
+			return ((1-d.Relate)*3*dis_y+300);
+		});
+		svg.append('path')
+		.attr({
+			'd': line(tmp[h].nodes),
+			'y': 0,
+			'stroke':colors[h],
+			'stroke-width': '1px',
+			'fill': 'none',
+			'opacity':'0.5'
+			
+		})
+		.style('stroke',colors[h]);
+	}
+	
+	
+	//
+	var elemEnter = elem.enter()
+	.append("a")
+	.attr("xlink:href", function(d){ return  d.Link })
+	.attr("target","_blank")
+	.append("g")
+	.attr("class",function(d){return "s"+d.Number1 })
+	.attr("id",function(d){return "p"+d.Branch })
+	
+	.attr("transform", function(d){
+		if(d.Branch==0)
+		return "translate("+(100+d.Number1*dis_x)+","+((1-0.18)*3*dis_y+100)+")";
+		else if(d.Branch==1)
+		return "translate("+(100+d.Number1*dis_x)+","+((1-d.Relate)*3*dis_y-100)+")";
+		else
+		return "translate("+(100+d.Number1*dis_x)+","+((1-d.Relate)*3*dis_y+300)+")";
+	})
+	.on("mouseover", function() {
+		 var c1 = d3.select(this).attr("id");
+		 var f1='#000';
+		 
+		 if(c1=="p0")f1=colors[0]
+		 else if(c1 == "p1")f1=colors[1]
+		 else f1=colors[2]
+		 
+		 d3.select(this).select("circle").style({'fill':f1,'opacity':'0.5'});
+		 d3.select(this).select("text").style({'opacity':'1'});
+		 d3.select(this).append("text").attr('class','tooltip')
+		 .attr("dy", function(d){return -20})
+		 .style({'display':'block','left':'100px','top':'100px;','fill':f1})
+		 .html(function(d){return "Likes : "+d.Like});
+	}) 
+	.on("mouseout", function() {d3.select(this).select("circle").style({'fill':'none','opacity':'0.6'});
+								d3.select(this).select("text").style({'opacity':'0.1'});
+								d3.select(this).select(".tooltip").remove();
+	}) 
+	//LOOP FOR TIME
+	
+	for(var j=0;j<25;j++)
+	{
+		
+		var class_str = ".s"+(j+1);
+		
+		var color_out;
+		var c2 = d3.select(class_str).attr("id");
+		for(var h=0;h<3;h++)
+		{
+			var str3 = "p"+h;
+			if(c2==str3)color_out=colors[h];
+		}
+		//LOOP FOR WATER
+		for (var i = 1; i < 5; ++i) {
+		if(i<4)
+		{
+			 var circle = d3.select(class_str).append("circle")
+				.attr("r", 0)
+				.style("stroke-width", 5 / (i))
+				.style({
+					'fill': color_out,
+					'opacity':0.5
+				})
+				.transition()
+				.delay(Math.pow(i, 2.5) * 50 +(json.nodes[j].Day-1)*4000)
+				.duration(4000)
+				.ease('quad-in')
+				.attr("r", function(d){return d.Like/500+20} )	
+				.style("stroke-opacity", 0)
+				.style({
+					'fill': color_out,
+					'opacity':0
+				})
+				.each("end", function () {
+					 d3.select(this).remove();
+				 });
+			
+			var text1 = d3.select(class_str).append("text")
+				//.attr("fill", "rgba(255,255,255,0.3)")
+				.style({
+					'fill': color_out,
+					'font-size': '10px',
+					'text-align':'center',
+					'opacity':'0.5',
+					'z-index':'100px',
+					'width':'80px'
+				})
+				.html(function(d){ return  d.Date2+d.Name +"</a>" })
+				.call(wrap)
+				.transition()
+				.delay(Math.pow(i, 2.5) * 50 + (json.nodes[j].Day-1)*4000)
+				
+				.duration(4000)
+				.ease('quad-in')
+				.style({
+					'fill': color_out,
+					'font-size': '10px',
+					'text-align':'center',
+					'opacity':'0',
+					'display':'block',
+					'z-index':'100px',
+					'width':'80px'
+				})
+				.each("end", function () {
+					 d3.select(this).remove();
+				 });
+				 
+		}
+		else
+		{
+			
+			var circle = d3.select(class_str).append("circle")
+				.attr("r", 0)
+				.style("stroke-width", 5 / (i))
+				.style({
+					'fill': color_out,
+					'opacity':0
+				})
+				.transition()
+				.delay(Math.pow(i, 2.5) * 50 + (json.nodes[j].Day-1)*4000)
+				.duration(4000)
+				.ease('quad-in')
+				.attr("r", function(d){ return d.Like/500+20 } )	
+				.style({
+					'stroke': color_out,
+					'fill': 'none',
+					'opacity':'0.7'
+				})
+				.style("stroke-opacity", 0.8)
+				.attr("xlink:href", function(d){ return  d.Link })
+			
+			//alert(c2);
+			var circle2 = d3.select(class_str).append("circle")
+				.attr("r", 0)
+				.style("stroke-width", 5 / (i))
+				//.on("mouseover", function() {d3.select(this).style({'fill':'white','opacity':'0.8'
+				//});}) 
+				//.on("mouseout", function() {d3.select(this).style('opacity','0.5');})
+				.style({
+					'fill': color_out,
+					'opacity':0
+				})
+				.transition()
+				.delay(Math.pow(i, 2.5) * 50 + (json.nodes[j].Day-1)*4000)
+				.duration(4000)
+				.ease('quad-in')
+				.attr("r", function(d){ return Math.pow(d.Relate2,2.1)*300 } )	
+				.style({
+					'stroke': color_out,
+					'fill': color_out,
+					'opacity':'0.6'
+				})
+				.style("stroke-opacity", 0.8)	
+				
+			//var link = d3.select(class_str).append("a")
+			
+			var text1 = d3.select(class_str)
+				
+				.append("text")
+				//.attr("fill", "rgba(255,255,255,0.3)")
+				
+				.style({
+					'fill': color_out,
+					'font-size': '10px',
+					'text-align':'center',
+					
+					'z-index':'100px',
+					'width':'80px'
+				})
+				.html(function(d){ return  d.Date2 +d.Name +"</a>" })
+				.call(wrap)
+				.transition()
+				.delay(Math.pow(i, 2.5) * 50 + (json.nodes[j].Day-1)*4000)
+				.style({
+					'fill': color_out,
+					'font-size': '10px',
+					'text-align':'center',
+					'opacity':'0.1',
+					'display':'block',
+					'z-index':'100px',
+					'width':'80px'
+				})
+				.duration(4000)
+		}
+	}
+	
+	}
+	
+   function wrap(text) {
+		var test2=text.text().length;
+		var str3=text.text();
+		//alert(str3);
+		var line=test2-8/7+1;
+		str_out=str3.substring(0,8);
+		if(test2>8)
+		{
+			var str_out="<tspan x='30' dy='1.2em' dx='-20'>"+str3.substring(0,8)+"</tspan>";
+			for(var x=0;x<line;x++)
+			{
+				if(x==line-1)
+				{
+					str_out =str_out+ "<tspan x='30' dy='1.2em' dx='-20'>"+str3.substring(8+x*7,length)+"</tspan>";
+				}
+				else str_out =str_out+ "<tspan x='30' dy='1.2em' dx='-20'>"+str3.substring(x*7+8,7*(x+1)+8)+"</tspan>";
+			}
+			text.html(str_out);
+		}
+	};
+})
+
+//})
+		</script>
+    </body>
+</html>

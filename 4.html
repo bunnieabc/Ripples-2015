@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Clicks</title>
+		    <style>
+    	body {
+          font-family: "helvetica";
+          height: 100%;
+		  background:#888;
+	}
+      
+	svg {
+	  cursor: pointer;
+	  width: 100%;
+	  height:600px;
+	}
+
+	circle {
+	  fill: none;
+	  stroke: #fff;
+	}
+	text{
+	color:#fff;
+	font-size:10px;
+	display:none;
+	}
+	
+	h1{
+	color:#fff;
+	}
+	
+	.tooltip
+	{
+		background:#fff;
+		color:#000;
+		width:100px;
+		height:100px;
+
+		position:absolute;
+	}
+    </style>    
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		</head>
+
+		<body>
+		<h1>News Test</h1>
+		
+		<script type="text/javascript">
+		
+		/*
+		var data2 = [
+		  {x:10,y:10},
+		  {x:50,y:100},
+		  {x:60,y:50},
+		  {x:100,y:30}
+		];
+		*/
+		 var width = 960,
+    		height = 500;
+
+		 var svg = d3.select("body").append("svg")
+			.attr("width", width)
+			.attr("height", height)
+			
+		/*	
+		 var line = d3.svg.line()
+			.x(function(d) {
+			  return d.x;
+			})
+			.y(function(d) {
+			  return d.y;
+			});
+		svg.append('path')
+		.attr({
+		  'd': line(data2),
+		  'y': 0,
+		  'stroke': '#000',
+		  'stroke-width': '5px',
+		  'fill': 'none'
+		});
+		*/
+		
+d3.json("2.json", function(json) {
+    /* Define the data for the circles */
+    var elem = svg.selectAll("g")
+        .data(json.nodes)
+    /*Create and place the "blocks" containing the circle and the text */  
+   
+    /*Create the circle for each block */
+	
+	var elemEnter = elem.enter()
+	.append("g")
+	.attr("class",function(d){return "s"+d.Number1 })
+	.attr("transform", function(d){return "translate("+d.Relate*1400+","+(100+d.Number1*18)+")"})
+	.on("mouseover", function() {d3.select(this).select("circle").style({'fill':'#00FFFF','opacity':'0.5','stroke':'#fff'});
+								 d3.select(this).select("text").style({'fill':'#003E3E','opacity':'1'});
+								 d3.select(this).append("text").attr('class','tooltip')
+								 .attr("dy", function(d){return -20})
+								 .style({'display':'block','left':'100px','top':'100px;','fill':'white'})
+								 .html("Detail");
+	}) 
+	.on("mouseout", function() {d3.select(this).select("circle").style({'fill':'none','opacity':'0.5'});
+								d3.select(this).select("text").style({'fill':'#fff','opacity':'0.5'});
+								d3.select(this).select(".tooltip").remove();
+	}) 
+	//LOOP FOR TIME
+	
+	for(var j=1;j<25;j++)
+	{
+		var class_str = ".s"+j;
+		
+		//LOOP FOR WATER
+		for (var i = 1; i < 5; ++i) {
+		if(i<4)
+		{
+			 var circle = d3.select(class_str).append("circle")
+				.attr("r", 0)
+				.style("stroke-width", 5 / (i))
+				.transition()
+				.delay(Math.pow(i, 2.5) * 50 +(json.nodes[j].Day-1)*2000)
+				.duration(2000)
+				.ease('quad-in')
+				.attr("r", function(d){return d.Like/300+10} )	
+				.style("stroke-opacity", 0)
+				.each("end", function () {
+					 d3.select(this).remove();
+				 });
+				 
+		}
+		else
+		{
+			var circle = d3.select(class_str).append("circle")
+				.attr("r", 0)
+				.style("stroke-width", 5 / (i))
+				//.on("mouseover", function() {d3.select(this).style({'fill':'white','opacity':'0.8'
+				//});}) 
+				//.on("mouseout", function() {d3.select(this).style('opacity','0.5');}) 
+				.transition()
+				.delay(Math.pow(i, 2.5) * 50 + (json.nodes[j].Day-1)*2000)
+				.duration(2000)
+				.ease('quad-in')
+				.attr("r", function(d){ return d.Like/300+10 } )	
+				.style("stroke-opacity", 0.5)
+				
+				
+
+			var text1 = d3.select(class_str).append("text")
+				//.attr("fill", "rgba(255,255,255,0.3)")
+				.attr("dx", function(d){return -20})
+				
+				.style({
+					fill: 'white',
+					'font-size': '10px',
+					'text-align':'center',
+					'opacity':'0.5',
+					'width':'100px'
+				})
+				//.on("mouseover", function() {d3.select(this).style({'opacity':'1'});}) 
+				//.on("mouseout", function() {d3.select(this).style('opacity','0.5');}) 
+				//.on("click", function() {d3.select(this).style('opacity','0.5');}) 
+				.html(function(d){ return "<a href="+d.Link+">"+d.Name+"</a>" })
+				.transition()
+				.delay(Math.pow(i, 2.5) * 50 + (json.nodes[j].Day-1)*2000)
+				.style({
+					fill: 'white',
+					'font-size': '10px',
+					'text-align':'center',
+					'opacity':'0.5',
+					'display':'block',
+					'z-index':'100px',
+					'width':'100px'
+				})
+				.duration(2000)
+
+		}
+	}
+	
+	}
+	
+
+})
+//})
+		</script>
+    </body>
+</html>

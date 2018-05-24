@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Clicks</title>
+		    <style>
+    	body {
+          font-family: "helvetica";
+          height: 300%;
+		  background:#fff;
+	}
+      
+	svg {
+	  cursor: pointer;
+	  width: 200%;
+	  height:1000px;
+	}
+
+	circle {
+	 fill:white;
+	 
+	  opacity:0.3;
+	}
+	text{
+		fill:#fff;
+		font-size:10px;
+		display:none;
+		width:80px;
+		float:left;
+	}
+	t1
+	{
+		position:absolute;
+		display
+	}
+	h1{
+	color:#fff;
+	}
+	
+	.tooltip
+	{
+		background:#fff;
+		color:#000;
+		width:100px;
+		height:100px;
+
+		position:absolute;
+	}
+    </style>    
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		</head>
+
+		<body>
+		<h1>News Test</h1>
+		
+		<script type="text/javascript">
+		
+		 var colors=["#CE0000", "#D94600", "#007500", "rgb(255, 200, 180)"];
+		
+		 var width = 1600,
+    		height = 700;
+
+		 var svg = d3.select("body").append("svg")
+			.attr("width", width)
+			.attr("height", height)
+			
+		svg.append('circle')
+		.attr('cx', 600)
+		.attr('cy', 520)
+		.attr('r', 6)
+		.style({
+			'stroke':colors[0],
+			'fill':colors[0],
+			'opacity':'1'
+		});
+		for(var t=0;t<3;t++)
+		{
+			svg.append('circle')
+			.attr('cx', 600)
+			.attr('cy', 520)
+			.attr('r', 150+t*130)
+			.style({
+				'stroke': colors[t],
+				'stroke-width': 3,
+				'fill': 'none',
+				'stroke-opacity':'1'
+			});
+		}
+		
+		
+	
+d3.json("2.json", function(json) {
+    /* Define the data for the circles */
+    //count branch
+	var tmp = new Array(3);
+	var count = new Array(3);
+	//依照Branch分群
+	for(var i=0;i<3;i++)
+	{
+		tmp[i] = {'nodes':[]};
+		count[i]=0;
+	}
+	
+	for(var i=0;i<3;i++)
+	{
+		var t=0;
+		for(var x=0;x<25;x++)
+		{
+			
+			if(json.nodes[x].Branch==i)
+			{
+				tmp[i].nodes.push(json.nodes[x]);
+				//alert(i+">"+tmp[i].nodes[t].Name);
+				//count[i]++;
+				t++;
+			}
+		}
+	}
+	//alert(count[0]);
+	
+	var elem = svg.selectAll("g")
+        .data(json.nodes)
+	var a = Math.cos(Math.PI/4);
+	var b = Math.sin(2 * Math.PI/6);
+	//alert(a+"<>"+b);
+	
+	
+	var elemEnter = elem.enter()
+	.append("a")
+	.attr("xlink:href", function(d){ return  d.Link })
+	.attr("target","_blank")
+	.append("g")
+	.attr("class",function(d){return "s"+d.Number1 })
+	.attr("id",function(d){return "p"+d.Branch })
+	.attr("transform", function(d){
+		if(d.Number1==1)return "translate("+(600)+","+(520)+")";
+		count[d.Branch]++;
+		if(d.Branch==0)
+		return "translate("+(600+Math.cos(count[d.Branch]*Math.PI*2/tmp[d.Branch].nodes.length-1)*200)+","
+				+(520+Math.sin(count[d.Branch]*Math.PI*2/tmp[d.Branch].nodes.length-1)*200)+")";
+		else if(d.Branch==1)
+		return "translate("+(600+Math.cos(d.Number1*2/Math.PI)*280)+","+(520+Math.sin(d.Number1*2/Math.PI)*280)+")";
+		else
+		return "translate("+(600+Math.cos(d.Number1*2/Math.PI)*410)+","+(520+Math.sin(d.Number1*2/Math.PI)*410)+")";
+	})
+	.on("mouseover", function() {
+		 var c1 = d3.select(this).attr("id");
+		 var f1='#000';
+		 
+		 if(c1=="p0")f1=colors[0]
+		 else if(c1 == "p1")f1=colors[1]
+		 else f1=colors[2]
+		 
+		 d3.select(this).select("circle").style({'fill':f1,'opacity':'0.5'});
+		 d3.select(this).select("text").style({'opacity':'1'});
+		 d3.select(this).append("text").attr('class','tooltip')
+		 .attr("dy", function(d){return -20})
+		 .style({'display':'block','left':'100px','top':'100px;','fill':f1})
+		 .html(function(d){return "Likes : "+d.Like});
+	}) 
+	.on("mouseout", function() {
+		d3.select(this).select("circle").style({'fill':'none','opacity':'1'});
+		d3.select(this).select("text").style({'opacity':'0.1'});
+		d3.select(this).select(".tooltip").remove();
+	}) 
+	//LOOP FOR TIME
+
+	var j=0;
+	var rec_j=json.nodes[j].Day;
+	svg.on("click", function() {
+		for(j;j<25;)
+		{
+			var class_str = ".s"+(j+1);	
+			var color_out;
+			var c2 = d3.select(class_str).attr("id");
+			for(var h=0;h<3;h++)
+			{
+				var str3 = "p"+h;
+				if(c2==str3)color_out=colors[h];
+			}
+
+			for (var i = 1; i < 5; ++i) {
+			if(i<4)
+			{
+				 var circle = d3.select(class_str).append("circle")
+					.attr("r", 0)
+					.style("stroke-width", 5 / (i))
+					.style({
+						'fill': color_out,
+						'opacity':0.5
+					})
+					.transition()
+					.delay(Math.pow(i, 2.5) * 50)
+					.duration(4000)
+					.ease('quad-in')
+					.attr("r", function(d){return d.Like/500+20} )	
+					.style("stroke-opacity", 0)
+					.style({
+						'fill': color_out,
+						'opacity':0
+					})
+					.each("end", function () {
+						 d3.select(this).remove();
+					 });
+				
+				var text1 = d3.select(class_str).append("text")
+					.style({
+						'fill': color_out,
+						'font-size': '10px',
+						'text-align':'center',
+						'opacity':'0.5',
+						'z-index':'100px',
+						'width':'80px'
+					})
+					.html(function(d){ return  d.Date2+d.Name +"</a>" })
+					.call(wrap)
+					.transition()
+					.delay(Math.pow(i, 2.5) * 50)
+					
+					.duration(4000)
+					.ease('quad-in')
+					.style({
+						'fill': color_out,
+						'font-size': '10px',
+						'text-align':'center',
+						'opacity':'0',
+						'display':'block',
+						'z-index':'100px',
+						'width':'80px'
+					})
+					.each("end", function () {
+						 d3.select(this).remove();
+					 });
+					 
+			}
+				else
+				{
+					
+					var circle = d3.select(class_str).append("circle")
+					.attr("r", 0)
+					.style("stroke-width", 5 / (i))
+					.style({
+						'fill': color_out,
+						'opacity':0
+					})
+					.transition()
+					.delay(Math.pow(i, 2.5) * 50)
+					.duration(4000)
+					.ease('quad-in')
+					.attr("r", function(d){ return d.Like/500+20 } )	
+					.style({
+						'stroke': color_out,
+						'fill': 'none',
+						'opacity':'0.7'
+					})
+					.style("stroke-opacity", 0.8)
+					.attr("xlink:href", function(d){ return  d.Link })
+					
+					//alert(c2);
+					var circle2 = d3.select(class_str).append("circle")
+					.attr("r", 0)
+					.style("stroke-width", 5 / (i))
+					.style({
+						'fill': color_out,
+						'opacity':0
+					})
+					.transition()
+					.delay(Math.pow(i, 2.5) * 50)
+					.duration(4000)
+					.ease('quad-in')
+					.attr("r", function(d){ return Math.pow(d.Relate2,2.1)*300 } )	
+					.style({
+						'stroke': color_out,
+						'fill': color_out,
+						'opacity':'0.6'
+					})
+					.style("stroke-opacity", 0.8)	
+					
+					var text1 = d3.select(class_str)
+					.append("text")
+					.style({
+						'fill': color_out,
+						'font-size': '10px',
+						'text-align':'center',
+						
+						'z-index':'100px',
+						'width':'80px'
+					})
+					.html(function(d){ return  d.Date2 +d.Name +"</a>" })
+					.call(wrap)
+					.transition()
+					.delay(Math.pow(i, 2.5) * 50)
+					.style({
+						'fill': color_out,
+						'font-size': '10px',
+						'text-align':'center',
+						'opacity':'0.1',
+						'display':'block',
+						'z-index':'100px',
+						'width':'80px'
+					})
+					.duration(4000)
+				}	
+			}
+			j++;
+			
+			if(j>=25)break;
+			if(json.nodes[j].Day==rec_j)continue;
+			else 
+			{
+				rec_j=json.nodes[j].Day;
+				break;
+			}
+		}
+	})
+	
+   function wrap(text) {
+		var test2=text.text().length;
+		var str3=text.text();
+		//alert(str3);
+		var line=test2/8+1;
+		if(test2>8)
+		{
+			var str_out="";
+			for(var x=0;x<line;x++)
+			{
+				if(x==line-1)
+				{
+					tr_out =str_out+ "<tspan x='30' dy='1em' dx='-20'>"+str3.substring(x*8,length)+"</tspan>";
+				}
+				else str_out =str_out+ "<tspan x='30' dy='1em' dx='-20'>"+str3.substring(x*8,8*(x+1))+"</tspan>";
+			}
+			text.html(str_out);
+		}
+	};
+})
+
+//})
+		</script>
+    </body>
+</html>

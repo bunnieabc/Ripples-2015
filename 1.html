@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Clicks</title>
+		    <style>
+    	body {
+          font-family: "helvetica";
+          height: 100%;
+		  background:#ccc;
+	}
+      
+	svg {
+	  cursor: pointer;
+	  width: 100%;
+	  height:600px;
+	}
+
+	circle {
+	  fill: none;
+	  stroke: #fff;
+	  color:#fff;
+	}
+	.text{
+		color:#fff;
+		display:none;
+		background:#F00;
+		position:fixed;
+		z-index:10;
+		top:100px;
+	}
+	h1
+	{
+		color:#fff;
+		position:absolute;
+		top:100px;
+		}
+
+    </style>    
+    <script type="text/javascript" src="jquery.js"></script>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    
+		</head>
+
+		<body>
+		<h1>Click Around, Have Some Fun.</h1>
+		
+		<script type="text/javascript">
+		    var r = 400;
+
+		    var svg = d3.select("body")
+		            .append("svg");
+
+		    var positionLabel = svg.append("text")
+		            .attr("x", 10)
+		            .attr("y", 30);
+					
+			svg.append('div')   
+				.attr("class", "text");
+			
+		     svg.on("click", function (){//("click", function () { //<-D
+				var positionX = 800 * Math.random();
+				var positionY = 600 * Math.random();
+								
+				svg.append("class","test");
+				svg.selectAll(".test").html("HI");
+		        for (var i = 1; i < 5; ++i) {
+		            //var position = d3.mouse(svg.node());
+					
+		            var circle = svg.append("circle")
+		                    .attr("cx", positionX)
+		                    .attr("cy", positionY)
+		                    .attr("r", 0)
+		                    .style("stroke-width", 5 / (i))
+		                    .transition()
+		                        .delay(Math.pow(i, 2.5) * 50)
+		                        .duration(5000)
+		                        .ease('quad-in')
+		                    .attr("r", r)
+							.text("test")
+		                    .style("stroke-opacity", 0)
+		                    .each("end", function () {
+		                        d3.select(this).remove();
+		                    });
+						
+					 /*var text2 = svg.append("text2")
+		                    .attr("cx", positionX)
+		                    .attr("cy", positionY)
+		                    .attr("r", 0)
+		                    .style("stroke-width", 5 / (i))
+							.style("display","block")
+		                    .transition()
+		                        .delay(Math.pow(i, 2.5) * 50)
+		                        .duration(2000)
+		                        .ease('quad-in')
+		                    .attr("r", r)
+		                    .style("stroke-opacity", 0)
+		                    .each("end", function () {
+		                        d3.select(this).remove();
+		                    });
+						*/
+		        }
+				
+					});
+		</script>
+    </body>
+</html>
